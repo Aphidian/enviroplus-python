@@ -10,8 +10,7 @@ import ST7735
 import time
 import ssl
 from bme280 import BME280
-from pms5003 import PMS5003, ReadTimeoutError, SerialTimeoutError
-from enviroplus import gas
+
 
 try:
     # Transitional fix for breaking change in LTR559
@@ -69,29 +68,11 @@ def read_bme280(bme280):
         int(bme280.get_pressure() * 100), -1
     )  # round to nearest 10
     values["humidity"] = int(bme280.get_humidity())
-    data = gas.read_all()
-    values["oxidised"] = int(data.oxidising / 1000)
-    values["reduced"] = int(data.reducing / 1000)
-    values["nh3"] = int(data.nh3 / 1000)
     values["lux"] = int(ltr559.get_lux())
     return values
 
 
-# Read values PMS5003 and return as dict
-def read_pms5003(pms5003):
-    values = {}
-    try:
-        pm_values = pms5003.read()  # int
-        values["pm1"] = pm_values.pm_ug_per_m3(1)
-        values["pm25"] = pm_values.pm_ug_per_m3(2.5)
-        values["pm10"] = pm_values.pm_ug_per_m3(10)
-    except ReadTimeoutError:
-        pms5003.reset()
-        pm_values = pms5003.read()
-        values["pm1"] = pm_values.pm_ug_per_m3(1)
-        values["pm25"] = pm_values.pm_ug_per_m3(2.5)
-        values["pm10"] = pm_values.pm_ug_per_m3(10)
-    return values
+
 
 
 # Get CPU temperature to use for compensation
